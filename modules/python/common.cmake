@@ -47,7 +47,11 @@ add_custom_command(
    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/headers.txt
    DEPENDS ${opencv_hdrs})
 
+IF (ENABLE_IOS_PYTHON)
+ocv_add_library(${the_module} STATIC ${PYTHON_SOURCE_DIR}/src2/cv2.cpp ${cv2_generated_hdrs})
+else()
 ocv_add_library(${the_module} MODULE ${PYTHON_SOURCE_DIR}/src2/cv2.cpp ${cv2_generated_hdrs})
+endif()
 
 if(PYTHON_DEBUG_LIBRARIES AND NOT PYTHON_LIBRARIES MATCHES "optimized.*debug")
   ocv_target_link_libraries(${the_module} debug ${PYTHON_DEBUG_LIBRARIES} optimized ${PYTHON_LIBRARIES})
@@ -60,16 +64,24 @@ else()
 endif()
 ocv_target_link_libraries(${the_module} ${OPENCV_MODULE_${the_module}_DEPS})
 
-execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import distutils.sysconfig; print(distutils.sysconfig.get_config_var('SO'))"
-                RESULT_VARIABLE PYTHON_CVPY_PROCESS
-                OUTPUT_VARIABLE CVPY_SUFFIX
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
+IF(ENABLE_IOS_PYTHON)
+  set_target_properties(${the_module} PROPERTIES
+                        LIBRARY_OUTPUT_DIRECTORY  "${LIBRARY_OUTPUT_PATH}/${MODULE_INSTALL_SUBDIR}"
+                        PREFIX ""
+                        OUTPUT_NAME cv2
+                        SUFFIX ".a")
+else() 
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import distutils.sysconfig; print(distutils.sysconfig.get_config_var('SO'))"
+                  RESULT_VARIABLE PYTHON_CVPY_PROCESS
+                  OUTPUT_VARIABLE CVPY_SUFFIX
+                  OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-set_target_properties(${the_module} PROPERTIES
-                      LIBRARY_OUTPUT_DIRECTORY  "${LIBRARY_OUTPUT_PATH}/${MODULE_INSTALL_SUBDIR}"
-                      PREFIX ""
-                      OUTPUT_NAME cv2
-                      SUFFIX ${CVPY_SUFFIX})
+  set_target_properties(${the_module} PROPERTIES
+                        LIBRARY_OUTPUT_DIRECTORY  "${LIBRARY_OUTPUT_PATH}/${MODULE_INSTALL_SUBDIR}"
+                        PREFIX ""
+                        OUTPUT_NAME cv2
+                        SUFFIX ${CVPY_SUFFIX})
+endif()
 
 if(ENABLE_SOLUTION_FOLDERS)
   set_target_properties(${the_module} PROPERTIES FOLDER "bindings")
