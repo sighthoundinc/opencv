@@ -838,11 +838,13 @@ macro(_ocv_create_module)
   )
 
   IF(IOS)
+    string(REPLACE "_" "" the_module_nounderscore ${the_module})
+
     set_target_properties(${the_module} PROPERTIES
       FRAMEWORK TRUE
       MACOSX_FRAMEWORK_BUNDLE_VERSION 1
       MACOSX_FRAMEWORK_SHORT_VERSION_STRING 1
-      MACOSX_FRAMEWORK_IDENTIFIER org.opencv.frameworks.${the_module}
+      MACOSX_FRAMEWORK_IDENTIFIER org.opencv.ios.frameworks.${the_module_nounderscore}
     )
   ENDIF ()
 
