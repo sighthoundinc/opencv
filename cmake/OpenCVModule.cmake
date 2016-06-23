@@ -837,6 +837,15 @@ macro(_ocv_create_module)
     INSTALL_NAME_DIR lib
   )
 
+  IF(IOS)
+    set_target_properties(${the_module} PROPERTIES
+      FRAMEWORK TRUE
+      MACOSX_FRAMEWORK_BUNDLE_VERSION 1
+      MACOSX_FRAMEWORK_SHORT_VERSION_STRING 1
+      MACOSX_FRAMEWORK_IDENTIFIER org.opencv.frameworks.${the_module}
+    )
+  ENDIF ()
+
   # For dynamic link numbering convenions
   if(NOT ANDROID)
     # Android SDK build scripts can include only .so files into final .apk
